@@ -1,1 +1,6 @@
 streamlit==1.28.0
+# Add to requirements.txt:
+tensorflow-cpu==2.13.0
+mediapipe==0.10.14
+
+# Enable real emotion and gesture detection
