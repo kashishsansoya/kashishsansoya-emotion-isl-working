@@ -123,7 +123,18 @@ def display_confidence(confidence):
     """Display confidence with visual bar"""
     st.markdown(f'<div class="confidence-bar" style="width: {confidence*100}%"></div>', unsafe_allow_html=True)
     st.write(f"**{confidence:.1%} confidence**")
+# Add this to your existing app (around line 120)
+st.markdown("### 📸 Real Image Upload (Beta)")
+uploaded_file = st.file_uploader("Try uploading an actual image", type=['jpg', 'jpeg', 'png'])
 
+if uploaded_file is not None:
+    st.success("✅ Image uploaded successfully!")
+    st.info("In the next version, this image will be processed by AI models.")
+    
+    # Show file info
+    file_size = len(uploaded_file.getvalue()) / 1024  # KB
+    st.write(f"**File size:** {file_size:.1f} KB")
+    st.write(f"**File type:** {uploaded_file.type}")
 # Main Application
 st.markdown('<div class="main-header">🎭 AI Emotion & Indian Sign Language Assistant</div>', unsafe_allow_html=True)
 
