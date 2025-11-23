@@ -1,4 +1,5 @@
 import streamlit as st
+from PIL import Image
 import base64
 
 # Page configuration
@@ -42,6 +43,12 @@ st.markdown("""
         border-radius: 10px;
         margin: 0.8rem 0;
     }
+    .confidence-bar {
+        height: 12px;
+        background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+        border-radius: 6px;
+        margin: 0.5rem 0;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -49,110 +56,140 @@ st.markdown("""
 st.markdown('<div class="main-header">🎭 Emotion-Based Indian Sign Language Assistant</div>', unsafe_allow_html=True)
 
 st.write("""
-This is a **working demo version** that demonstrates the concept without external dependencies.
-Upload an image to see simulated emotion and gesture detection with text-to-speech!
+This is a **working version** with real image upload capability. Upload an image to see simulated emotion and gesture detection!
 """)
 
-# File uploader using Streamlit's built-in camera input
+# File uploader
 uploaded_file = st.file_uploader("📁 Upload an image file", type=['jpg', 'jpeg', 'png'])
 
-# Sample images for demonstration
-sample_images = {
-    "Happy Face + Hello Gesture": "😊 + 👋",
-    "Surprised Face + Thank You": "😲 + 🙏", 
-    "Neutral Face + Yes Gesture": "😐 + 👍",
-    "Angry Face + No Gesture": "😠 + 👎"
-}
+if uploaded_file is not None:
+    try:
+        # Display the uploaded image
+        image = Image.open(uploaded_file)
+        
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
+            st.subheader("📷 Uploaded Image")
+            st.image(image, use_column_width=True, caption="Your Image")
+            
+            # Show image info
+            st.write(f"**Image Size:** {image.size[0]} x {image.size[1]} pixels")
+            st.write(f"**Image Format:** {image.format}")
+        
+        with col2:
+            st.subheader("🔍 Analysis Results")
+            
+            # Simulate AI analysis based on image characteristics
+            width, height = image.size
+            aspect_ratio = width / height
+            
+            # Determine emotion based on image properties (simulated)
+            if aspect_ratio > 1.2:
+                emotion, emotion_conf = ("Happy 😊", 0.85)
+            elif aspect_ratio < 0.8:
+                emotion, emotion_conf = ("Surprised 😲", 0.78)
+            else:
+                emotion, emotion_conf = ("Neutral 😐", 0.72)
+            
+            st.markdown(f'<div class="emotion-card">', unsafe_allow_html=True)
+            st.write(f"**Detected Emotion:** {emotion}")
+            st.write(f"**Confidence:** {emotion_conf:.0%}")
+            st.markdown(f'<div class="confidence-bar" style="width: {emotion_conf*100}%"></div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+            # Simulate gesture detection
+            file_size = len(uploaded_file.getvalue())
+            if file_size > 1000000:  # Larger files might have more detail
+                gesture, gesture_conf = ("Hello 👋", 0.82)
+            else:
+                gesture, gesture_conf = ("Thank You 🙏", 0.75)
+            
+            st.markdown(f'<div class="gesture-card">', unsafe_allow_html=True)
+            st.write(f"**ISL Gesture:** {gesture}")
+            st.write(f"**Confidence:** {gesture_conf:.0%}")
+            st.markdown(f'<div class="confidence-bar" style="width: {gesture_conf*100}%"></div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+            # Text-to-Speech Simulation
+            prediction_text = f"Analysis complete. Emotion detected: {emotion}. Sign language gesture: {gesture}."
+            
+            st.markdown("### 🔊 Audio Output")
+            st.markdown(f'<div class="prediction-card">{prediction_text}</div>', unsafe_allow_html=True)
+            
+            if st.button("🎵 Simulate Text-to-Speech", type="primary"):
+                st.balloons()
+                st.success("✅ Audio simulation successful!")
+                st.info(f"🔊 In the full version, this would say: '{prediction_text}'")
+                
+    except Exception as e:
+        st.error(f"Error processing image: {str(e)}")
 
-# Quick selection
-selected_sample = st.selectbox("Or choose a sample scenario:", list(sample_images.keys()))
+# Demo section for testing without upload
+st.markdown("---")
+st.markdown("### 🎯 Quick Demo (No Upload Required)")
 
-if uploaded_file is not None or selected_sample:
-    
-    col1, col2 = st.columns([2, 1])
+demo_option = st.selectbox("Choose a demo scenario:", 
+                          ["Happy Person 👋", "Surprised Expression 🙏", "Neutral Face 👍", "Angry Gesture 👎"])
+
+if demo_option:
+    col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("📷 Image Analysis")
-        
-        if uploaded_file is not None:
-            # Display uploaded image
-            st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
+        st.subheader("Demo Scenario")
+        if "Happy" in demo_option:
+            st.markdown("<h1 style='text-align: center; font-size: 4rem;'>😊 👋</h1>", unsafe_allow_html=True)
+            st.write("**Scenario:** Person smiling with hello gesture")
+        elif "Surprised" in demo_option:
+            st.markdown("<h1 style='text-align: center; font-size: 4rem;'>😲 🙏</h1>", unsafe_allow_html=True)
+            st.write("**Scenario:** Surprised expression with thank you gesture")
+        elif "Neutral" in demo_option:
+            st.markdown("<h1 style='text-align: center; font-size: 4rem;'>😐 👍</h1>", unsafe_allow_html=True)
+            st.write("**Scenario:** Neutral face with yes gesture")
         else:
-            # Show sample scenario
-            st.info(f"**Sample Scenario:** {selected_sample}")
-            st.write(f"**Visual:** {sample_images[selected_sample]}")
-            
-            # Create a simple visual representation
-            if "Happy" in selected_sample:
-                st.markdown("<h1 style='text-align: center;'>😊 + 👋</h1>", unsafe_allow_html=True)
-            elif "Surprised" in selected_sample:
-                st.markdown("<h1 style='text-align: center;'>😲 + 🙏</h1>", unsafe_allow_html=True)
-            elif "Neutral" in selected_sample:
-                st.markdown("<h1 style='text-align: center;'>😐 + 👍</h1>", unsafe_allow_html=True)
-            else:
-                st.markdown("<h1 style='text-align: center;'>😠 + 👎</h1>", unsafe_allow_html=True)
+            st.markdown("<h1 style='text-align: center; font-size: 4rem;'>😠 👎</h1>", unsafe_allow_html=True)
+            st.write("**Scenario:** Angry expression with no gesture")
     
     with col2:
-        st.subheader("🔍 Detection Results")
+        st.subheader("Analysis Results")
         
-        # Simulate emotion detection
-        emotions = {
-            "Happy Face + Hello Gesture": ("Happy 😊", 0.89),
-            "Surprised Face + Thank You": ("Surprised 😲", 0.82),
-            "Neutral Face + Yes Gesture": ("Neutral 😐", 0.76),
-            "Angry Face + No Gesture": ("Angry 😠", 0.91)
+        # Predefined results for demo scenarios
+        demo_results = {
+            "Happy Person 👋": (("Happy 😊", 0.89), ("Hello 👋", 0.87)),
+            "Surprised Expression 🙏": (("Surprised 😲", 0.82), ("Thank You 🙏", 0.79)),
+            "Neutral Face 👍": (("Neutral 😐", 0.76), ("Yes 👍", 0.83)),
+            "Angry Gesture 👎": (("Angry 😠", 0.91), ("No 👎", 0.88))
         }
         
-        if selected_sample in emotions:
-            emotion, confidence = emotions[selected_sample]
-        else:
-            emotion, confidence = ("Happy 😊", 0.85)
+        (emotion, emotion_conf), (gesture, gesture_conf) = demo_results[demo_option]
         
         st.markdown(f'<div class="emotion-card">', unsafe_allow_html=True)
-        st.write(f"**Detected Emotion:** {emotion}")
-        st.write(f"**Confidence:** {confidence:.0%}")
+        st.write(f"**Emotion:** {emotion}")
+        st.write(f"**Confidence:** {emotion_conf:.0%}")
         st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Simulate gesture detection
-        gestures = {
-            "Happy Face + Hello Gesture": ("Hello 👋", 0.87),
-            "Surprised Face + Thank You": ("Thank You 🙏", 0.79),
-            "Neutral Face + Yes Gesture": ("Yes 👍", 0.83),
-            "Angry Face + No Gesture": ("No 👎", 0.88)
-        }
-        
-        if selected_sample in gestures:
-            gesture, gesture_conf = gestures[selected_sample]
-        else:
-            gesture, gesture_conf = ("Hello 👋", 0.80)
         
         st.markdown(f'<div class="gesture-card">', unsafe_allow_html=True)
-        st.write(f"**ISL Gesture:** {gesture}")
+        st.write(f"**Gesture:** {gesture}")
         st.write(f"**Confidence:** {gesture_conf:.0%}")
         st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Text-to-Speech Simulation
-        prediction_text = f"Analysis complete. Emotion detected: {emotion}. Sign language gesture: {gesture}."
-        
-        st.markdown("### 🔊 Audio Output")
-        st.markdown(f'<div class="prediction-card">{prediction_text}</div>', unsafe_allow_html=True)
-        
-        if st.button("🎵 Simulate Text-to-Speech", type="primary"):
-            st.balloons()
-            st.success("✅ Audio would say: " + prediction_text)
-            st.info("🔊 In the full version, this would play as audio using gTTS!")
 
-# Demo section for future enhancements
+# Progress tracker
 st.markdown("---")
 st.markdown("""
-## 🚀 Future Enhancements
+## 🚀 Implementation Progress
 
-Once this basic version is deployed successfully, we can add:
+### ✅ Completed
+- **Basic Streamlit App** - Deployed and working
+- **Image Upload** - Real image processing with Pillow
+- **Beautiful UI** - Professional interface
+- **Simulated AI** - Working demonstration
 
-### 🔧 Phase 1: Add Image Processing
-```python
-# Add to requirements.txt:
+### 🔄 Next Steps
+1. **Add OpenCV** for advanced image processing
+2. **Add gTTS** for real text-to-speech
+3. **Add pre-trained models** for real AI detection
+
+### 📦 Current Dependencies
+```txt
+streamlit==1.28.0
 Pillow==10.0.1
-opencv-python-headless==4.8.1.78
-
-# Enable actual image upload and display
